@@ -52,12 +52,12 @@ export default function MascotShowcase() {
   const current = MASCOTS.find((m) => m.id === selectedId) || MASCOTS[0];
 
   return (
-    <section className="py-20 px-4 sm:px-8 max-w-6xl mx-auto w-full">
-      <div className="glass-card rounded-3xl p-8 sm:p-12 border border-white/90 shadow-xl relative overflow-hidden bg-gradient-to-br from-white/95 via-white/85 to-[#AECFD0]/20">
+    <section className="py-24 sm:py-32 px-4 sm:px-8 max-w-6xl mx-auto w-full">
+      <div className="glass-card rounded-[36px] p-8 sm:p-14 border border-white/90 shadow-xl relative overflow-hidden bg-gradient-to-br from-white/95 via-white/85 to-[#AECFD0]/20">
         {/* Ambient Blur */}
-        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-[#A3D6BC]/30 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-[#A3D6BC]/30 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col lg:flex-row items-center gap-10">
+        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           {/* Left Column: Mascot Cards & Selector */}
           <div className="w-full lg:w-1/2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#AECFD0]/30 text-[#2D3748] border border-[#AECFD0]/50 mb-3">
