@@ -1,25 +1,32 @@
 import nodemailer from "nodemailer";
 
-export const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: Number(process.env.SMTP_PORT) || 465,
-  secure: Number(process.env.SMTP_PORT) === 465 || true,
-  auth: {
-    user: process.env.SMTP_USER || "fomonomo.news@gmail.com",
-    pass: process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || "",
-  },
-});
+const getSmtpPass = () => {
+  const raw = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || "";
+  return raw.replace(/\s+/g, "");
+};
+
+export function getTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: Number(process.env.SMTP_PORT) || 465,
+    secure: Number(process.env.SMTP_PORT) === 465 || true,
+    auth: {
+      user: process.env.SMTP_USER || "fomonomo.news@gmail.com",
+      pass: getSmtpPass(),
+    },
+  });
+}
 
 export async function sendWaitlistConfirmationEmail(
   toEmail: string,
   spotNumber: number
 ) {
   const smtpUser = process.env.SMTP_USER || "fomonomo.news@gmail.com";
-  const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD;
+  const smtpPass = getSmtpPass();
   const fromAddress =
     process.env.SMTP_FROM || `"FOMO NOMO" <${smtpUser}>`;
 
-  // If no SMTP password provided, log a dev note so the app doesn't crash
+  // If no SMTP password provided, log a dev note
   if (!smtpPass || smtpPass === "your_gmail_app_password_here") {
     console.warn(
       `[Mailer Notice] Email not sent to ${toEmail} because SMTP_PASS is not configured yet. Set GMAIL_APP_PASSWORD or SMTP_PASS in .env.local to send live emails via fomonomo.news@gmail.com.`
@@ -252,6 +259,7 @@ export async function sendWaitlistConfirmationEmail(
   `;
 
   try {
+    const transporter = getTransporter();
     const info = await transporter.sendMail({
       from: fromAddress,
       to: toEmail,
