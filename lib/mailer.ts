@@ -34,8 +34,6 @@ export async function sendWaitlistConfirmationEmail(
     return { success: false, reason: "SMTP credentials not configured" };
   }
 
-  const referralLink = `https://fomonomo.app/join?ref=vip-${spotNumber}`;
-
   const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -129,6 +127,12 @@ export async function sendWaitlistConfirmationEmail(
       letter-spacing: -1px;
       margin: 0;
     }
+    .ticket-desc {
+      margin: 6px 0 0 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2563EB;
+    }
     .card-list {
       background-color: #F8FAFC;
       border-radius: 18px;
@@ -139,7 +143,7 @@ export async function sendWaitlistConfirmationEmail(
     .card-item {
       display: flex;
       align-items: flex-start;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       font-size: 14px;
       line-height: 1.5;
       color: #4A5568;
@@ -152,25 +156,6 @@ export async function sendWaitlistConfirmationEmail(
       font-weight: bold;
       margin-right: 10px;
       font-size: 16px;
-    }
-    .referral-box {
-      background-color: #FFFFFF;
-      border: 1px solid #E2E8F0;
-      border-radius: 18px;
-      padding: 20px;
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .referral-link {
-      display: inline-block;
-      margin-top: 10px;
-      padding: 12px 24px;
-      background-color: #2563EB;
-      color: #FFFFFF !important;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-      border-radius: 14px;
     }
     .quote-box {
       border-left: 3px solid #AECFD0;
@@ -198,49 +183,36 @@ export async function sendWaitlistConfirmationEmail(
       </div>
 
       <div style="text-align: center;">
-        <span class="badge">Early Access Confirmed</span>
+        <span class="badge">Waitlist Confirmed</span>
         <h1 class="headline">Never miss out again.</h1>
         <p class="subtitle">
-          You are officially on the early access waitlist for the <strong>FOMO NOMO</strong> iOS app.
+          You are officially on the waitlist for the <strong>FOMO NOMO</strong> iOS app. We have your email registered so you receive an exclusive discount as soon as we launch!
         </p>
       </div>
 
       <!-- Ticket Spot Box -->
       <div class="ticket-box">
-        <div class="ticket-label">Your Priority Waitlist Spot</div>
+        <div class="ticket-label">Your Spot</div>
         <div class="ticket-number">#${spotNumber}</div>
-        <p style="margin: 6px 0 0 0; font-size: 12px; color: #718096;">
-          Wave 1 iOS TestFlight Allocation
+        <p class="ticket-desc">
+          Launch Discount Reserved
         </p>
       </div>
 
-      <!-- App Philosophy & Perks -->
+      <!-- App Overview & Discount Info -->
       <div class="card-list">
         <div class="card-item">
           <span class="card-bullet">✓</span>
-          <span><strong>Open → Read → Done:</strong> One calm 5-minute daily briefing tailored to your country and profession.</span>
+          <span><strong>Exclusive Launch Discount:</strong> Because you joined the waitlist early, we&apos;ll email you a private discount code the moment FOMO NOMO drops on the App Store.</span>
         </div>
         <div class="card-item">
           <span class="card-bullet">✓</span>
-          <span><strong>The &ldquo;Done For Today&rdquo; Lock:</strong> Once read, the app locks the feed to protect your focus and peace of mind.</span>
+          <span><strong>Pay Once, Own Forever:</strong> Zero subscription anxiety. No recurring monthly fees. Pay once and keep your peace of mind forever.</span>
         </div>
         <div class="card-item">
           <span class="card-bullet">✓</span>
-          <span><strong>Pay Once, Own Forever:</strong> Zero subscription anxiety. No monthly charges. No invasive ad tracking.</span>
+          <span><strong>Open → Read → Done:</strong> One calm 5-minute daily briefing tailored to your country and profession. Once read, the app locks to protect your focus.</span>
         </div>
-      </div>
-
-      <!-- Referral Share -->
-      <div class="referral-box">
-        <p style="margin: 0; font-size: 13px; font-weight: 600; color: #2D3748;">
-          Want to move up the TestFlight queue?
-        </p>
-        <p style="margin: 4px 0 12px 0; font-size: 12px; color: #718096;">
-          Share your personal invite link with colleagues and friends:
-        </p>
-        <a href="${referralLink}" class="referral-link" target="_blank">
-          Share Your Invite Link
-        </a>
       </div>
 
       <div class="quote-box">
@@ -250,7 +222,7 @@ export async function sendWaitlistConfirmationEmail(
 
       <div class="footer">
         <p style="margin: 0 0 6px 0;">Sent with calm by <strong>FOMO NOMO</strong> by Lumivor</p>
-        <p style="margin: 0;">You received this because you requested early access at fomonomo.app</p>
+        <p style="margin: 0;">You received this because you signed up for launch updates and discounts at fomonomo.app</p>
       </div>
     </div>
   </div>

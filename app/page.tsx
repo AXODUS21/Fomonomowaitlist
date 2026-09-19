@@ -99,8 +99,7 @@ export default function Home() {
   };
 
   const copyReferral = () => {
-    const spotNum = userSpot || waitlistCount;
-    const link = `https://fomonomo.app/join?ref=vip-${spotNum}`;
+    const link = "https://fomonomo.app";
     navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -230,16 +229,16 @@ export default function Home() {
               <h3 className="font-display font-black text-2xl text-[#2D3748] mb-2">
                 {isAlreadyJoined
                   ? "Your spot is confirmed."
-                  : "You're in. Priority access reserved."}
+                  : "You're on the waitlist!"}
               </h3>
               <p className="text-sm text-[#718096] mb-5 max-w-sm mx-auto">
-                Confirmation registered for <strong className="text-[#2D3748]">{email}</strong>. We&apos;ll notify you when the iOS TestFlight build drops.
+                We&apos;ve registered <strong className="text-[#2D3748]">{email}</strong>. We&apos;ll send your launch discount code to your inbox as soon as FOMO NOMO goes live.
               </p>
 
-              {/* Referral Link */}
+              {/* Share */}
               <div className="bg-white/90 rounded-2xl p-3.5 border border-[#2D3748]/10 flex flex-col sm:flex-row items-center gap-3">
                 <span className="text-xs text-[#718096] flex-1 text-center sm:text-left">
-                  Share with friends to jump the queue:
+                  Share FOMO NOMO with friends:
                 </span>
                 <button
                   type="button"
