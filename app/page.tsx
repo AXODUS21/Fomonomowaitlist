@@ -1,30 +1,87 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import confetti from "canvas-confetti";
 import { Send, Check, Copy, Sparkles, ShieldCheck, HeartHandshake } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [copied, setCopied] = useState(false);
-  const [waitlistNumber, setWaitlistNumber] = useState(1482);
+  const [userSpot, setUserSpot] = useState<number | null>(null);
+  const [isAlreadyJoined, setIsAlreadyJoined] = useState(false);
+  const [waitlistCount, setWaitlistCount] = useState<number>(500);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Fetch initial live count and subscribe to real-time additions
+  useEffect(() => {
+    const fetchInitialCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from("waitlist")
+          .select("*", { count: "exact", head: true });
+
+        if (!error && count !== null) {
+          setWaitlistCount(500 + count);
+        }
+      } catch {
+        // graceful fallback to 500
+      }
+    };
+
+    fetchInitialCount();
+
+    // Supabase Realtime subscription
+    const channel = supabase
+      .channel("waitlist-realtime-counter")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "waitlist" },
+        () => {
+          setWaitlistCount((prev) => prev + 1);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !email.includes("@") || !email.includes(".")) {
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (!trimmedEmail || !trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
       setErrorMsg("Please enter a valid email address");
       return;
     }
+
     setErrorMsg("");
     setStatus("loading");
 
-    setTimeout(() => {
-      setStatus("success");
-      setWaitlistNumber((prev) => prev + 1);
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmedEmail }),
+      });
 
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMsg(data.error || "Failed to join waitlist. Please try again.");
+        setStatus("idle");
+        return;
+      }
+
+      setUserSpot(data.spot);
+      setIsAlreadyJoined(Boolean(data.alreadyJoined));
+      setStatus("success");
+
+      // Trigger celebration confetti
       try {
         confetti({
           particleCount: 90,
@@ -35,11 +92,15 @@ export default function Home() {
       } catch {
         // Fallback gracefully
       }
-    }, 500);
+    } catch {
+      setErrorMsg("Network error. Please try again.");
+      setStatus("idle");
+    }
   };
 
   const copyReferral = () => {
-    const link = `https://fomonomo.app/join?ref=vip-${waitlistNumber}`;
+    const spotNum = userSpot || waitlistCount;
+    const link = `https://fomonomo.app/join?ref=vip-${spotNum}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -67,7 +128,7 @@ export default function Home() {
             />
           </div>
           <span className="font-display font-black text-xl tracking-tight text-[#2D3748]">
-            FOMO<span className="text-[#3B82F6]">NOMO</span>
+            FOMO<span className="text-blue-600">NOMO</span>
           </span>
         </div>
 
@@ -90,7 +151,7 @@ export default function Home() {
           />
         </div>
 
-        {/* Headline requested by user */}
+        {/* Headline */}
         <h1 className="font-display font-black text-4xl sm:text-6xl text-[#2D3748] tracking-tight leading-[1.08] mb-4">
           Never miss out again.
         </h1>
@@ -162,13 +223,17 @@ export default function Home() {
             <div className="glass-card rounded-[32px] p-8 shadow-2xl border border-white/90 animate-in fade-in zoom-in-95 duration-300">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-3">
                 <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                You&apos;re on the list! (# {waitlistNumber})
+                {isAlreadyJoined
+                  ? `You're already registered! (#${userSpot})`
+                  : `You're on the list! (#${userSpot})`}
               </div>
               <h3 className="font-display font-black text-2xl text-[#2D3748] mb-2">
-                You&apos;re in. Priority access reserved.
+                {isAlreadyJoined
+                  ? "Your spot is confirmed."
+                  : "You're in. Priority access reserved."}
               </h3>
               <p className="text-sm text-[#718096] mb-5 max-w-sm mx-auto">
-                We sent a confirmation to <strong className="text-[#2D3748]">{email}</strong>. We&apos;ll notify you when the iOS TestFlight build drops.
+                Confirmation registered for <strong className="text-[#2D3748]">{email}</strong>. We&apos;ll notify you when the iOS TestFlight build drops.
               </p>
 
               {/* Referral Link */}
@@ -199,6 +264,7 @@ export default function Home() {
                 onClick={() => {
                   setStatus("idle");
                   setEmail("");
+                  setIsAlreadyJoined(false);
                 }}
                 className="mt-4 text-xs text-[#718096] hover:underline cursor-pointer"
               >
@@ -208,7 +274,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* Social Proof */}
+        {/* Live Social Proof Counter starting at 500 */}
         <div className="mt-8 flex items-center justify-center gap-2.5 text-xs text-[#718096]">
           <div className="flex items-center -space-x-1.5">
             {["🧑‍💻", "👩‍🔬", "👨‍🎨", "👩‍💼"].map((emoji, i) => (
@@ -220,9 +286,15 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <span>
-            <strong className="text-[#2D3748]">1,480+</strong> people waiting for the iOS launch
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#10B981] animate-pulse" />
+            <span>
+              <strong className="text-[#2D3748] font-bold">
+                {waitlistCount.toLocaleString()}
+              </strong>{" "}
+              people waiting for the iOS launch
+            </span>
+          </div>
         </div>
       </main>
 
