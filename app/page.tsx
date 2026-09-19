@@ -1,163 +1,236 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
-import WaitlistForm from "@/components/WaitlistForm";
-import HeroRitual from "@/components/HeroRitual";
-import Comparison from "@/components/Comparison";
-import Features from "@/components/Features";
-import MascotShowcase from "@/components/MascotShowcase";
-import Faq from "@/components/Faq";
-import Footer from "@/components/Footer";
-import { Sparkles, ArrowRight, ShieldCheck, Coins } from "lucide-react";
+import confetti from "canvas-confetti";
+import { Send, Check, Copy, Sparkles, ShieldCheck, HeartHandshake } from "lucide-react";
 
 export default function Home() {
-  const scrollToWaitlist = () => {
-    const el = document.getElementById("waitlist");
-    const input = document.getElementById("waitlist-email-input");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-      setTimeout(() => {
-        if (input) input.focus();
-      }, 450);
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [waitlistNumber, setWaitlistNumber] = useState(1482);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      setErrorMsg("Please enter a valid email address");
+      return;
     }
+    setErrorMsg("");
+    setStatus("loading");
+
+    setTimeout(() => {
+      setStatus("success");
+      setWaitlistNumber((prev) => prev + 1);
+
+      try {
+        confetti({
+          particleCount: 90,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ["#AECFD0", "#A3D6BC", "#3B82F6", "#A78BFA", "#F59E0B"],
+        });
+      } catch {
+        // Fallback gracefully
+      }
+    }, 500);
+  };
+
+  const copyReferral = () => {
+    const link = `https://fomonomo.app/join?ref=vip-${waitlistNumber}`;
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col bg-[#F4F7F6] text-[#2D3748] selection:bg-[#AECFD0]/40">
-      {/* Background Decorative Mesh Blobs */}
+    <div className="relative min-h-screen flex flex-col justify-between items-center bg-[#F4F7F6] text-[#2D3748] px-4 py-8 sm:py-12 overflow-hidden selection:bg-[#AECFD0]/40">
+      {/* Ambient background blur blobs */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[10%] w-[550px] h-[550px] rounded-full bg-[#AECFD0]/25 blur-[140px] animate-pulse-glow" />
-        <div className="absolute top-[25%] right-[-5%] w-[650px] h-[650px] rounded-full bg-[#A3D6BC]/25 blur-[150px] animate-pulse-glow" />
-        <div className="absolute bottom-[10%] left-[20%] w-[600px] h-[600px] rounded-full bg-[#A78BFA]/15 blur-[140px]" />
+        <div className="absolute top-[-10%] left-[15%] w-[500px] h-[500px] rounded-full bg-[#AECFD0]/30 blur-[130px] animate-pulse-glow" />
+        <div className="absolute bottom-[-10%] right-[15%] w-[550px] h-[550px] rounded-full bg-[#A3D6BC]/30 blur-[140px] animate-pulse-glow" />
       </div>
 
-      {/* Header */}
-      <Navbar />
-
-      {/* Main Container */}
-      <main className="relative z-10 flex-1 flex flex-col items-center">
-        {/* HERO SECTION with generous top padding so navbar never overlaps */}
-        <section className="pt-32 sm:pt-40 lg:pt-44 pb-20 sm:pb-28 px-4 sm:px-8 max-w-6xl mx-auto w-full">
-          <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
-            {/* Top Pill */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold bg-white/85 border border-[#2D3748]/10 shadow-xs mb-8 text-[#2D3748]">
-              <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-ping" />
-              <span>✦ The Anti-Doomscroll Digest</span>
-              <span className="text-[#718096]">•</span>
-              <span className="text-[#10B981]">Pay Once, Own Forever</span>
-            </div>
-
-            {/* Headline requested by user */}
-            <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl text-[#2D3748] tracking-tight leading-[1.08] mb-6">
-              Never miss out again.
-            </h1>
-
-            {/* Sub-headline */}
-            <p className="text-lg sm:text-xl text-[#718096] leading-relaxed max-w-2xl mx-auto font-medium">
-              No endless feeds. No rage-inducing algorithms. Just one calm,
-              personalized daily news briefing designed to be finished in 5
-              minutes.
-            </p>
+      {/* Top Brand Bar */}
+      <header className="relative z-10 w-full max-w-xl flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-10 h-10 rounded-2xl bg-white shadow-xs border border-[#AECFD0]/40 flex items-center justify-center overflow-hidden">
+            <Image
+              src="/logo-sm.png"
+              alt="FOMO NOMO Logo"
+              width={40}
+              height={40}
+              className="object-cover"
+              priority
+            />
           </div>
+          <span className="font-display font-black text-xl tracking-tight text-[#2D3748]">
+            FOMO<span className="text-[#3B82F6]">NOMO</span>
+          </span>
+        </div>
 
-          {/* Hero Grid: Waitlist Form on Left, Authentic App Ritual on Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-14 items-start">
-            {/* Left Col: Waitlist Form */}
-            <div className="lg:col-span-6 flex flex-col justify-center">
-              <WaitlistForm />
-            </div>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/85 text-[#2D3748] border border-[#2D3748]/10 shadow-2xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+          iOS Beta
+        </span>
+      </header>
 
-            {/* Right Col: Authentic App Ritual (replaces clunky phone mockup) */}
-            <div className="lg:col-span-6 flex justify-center lg:justify-end">
-              <HeroRitual />
-            </div>
-          </div>
-        </section>
+      {/* Center Main Stage */}
+      <main className="relative z-10 w-full max-w-xl my-auto py-8 sm:py-12 flex flex-col items-center text-center">
+        {/* Animated Mascot Badge */}
+        <div className="relative w-28 h-28 sm:w-32 sm:h-32 mb-6 transition-transform duration-300 hover:scale-105">
+          <Image
+            src={status === "success" ? "/mascot-excited.png" : "/mascot.png"}
+            alt="FOMO NOMO Mascot"
+            fill
+            className="object-contain drop-shadow-sm"
+            priority
+          />
+        </div>
 
-        {/* ONE-TIME PURCHASE & VIP BANNER */}
-        <section className="w-full max-w-6xl mx-auto px-4 sm:px-8 my-8 sm:my-12">
-          <div className="glass-card rounded-[32px] p-8 sm:p-10 border border-white/90 shadow-md bg-gradient-to-r from-white/95 via-white/85 to-[#AECFD0]/30 flex flex-col sm:flex-row items-center justify-between gap-8">
-            <div className="flex items-center gap-5 text-center sm:text-left">
-              <div className="w-16 h-16 rounded-2xl bg-[#AECFD0]/35 border border-[#AECFD0]/60 flex items-center justify-center shrink-0 shadow-2xs">
-                <Coins className="w-8 h-8 text-[#2D3748]" />
-              </div>
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#10B981] uppercase tracking-wider">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>No Subscription Fatigue</span>
+        {/* Headline requested by user */}
+        <h1 className="font-display font-black text-4xl sm:text-6xl text-[#2D3748] tracking-tight leading-[1.08] mb-4">
+          Never miss out again.
+        </h1>
+
+        {/* Sub-headline */}
+        <p className="text-base sm:text-lg text-[#718096] leading-relaxed max-w-md mb-8">
+          The anti-doomscroll daily news briefing. Open → Read → Done in 5 minutes.
+        </p>
+
+        {/* The Card with Email Input */}
+        <div className="w-full">
+          {status !== "success" ? (
+            <div className="glass-card rounded-[32px] p-6 sm:p-8 shadow-xl border border-white/90 relative overflow-hidden">
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  <div className="relative flex-1">
+                    <input
+                      id="waitlist-email-input"
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errorMsg) setErrorMsg("");
+                      }}
+                      placeholder="Enter your email address..."
+                      className="w-full px-5 py-4 rounded-2xl bg-white/95 text-[#2D3748] placeholder:text-[#718096]/60 border border-[#2D3748]/15 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-600 text-sm transition-all shadow-inner"
+                      disabled={status === "loading"}
+                      autoFocus
+                    />
+                    {errorMsg && (
+                      <p className="text-xs text-red-500 font-medium mt-1.5 pl-1 text-left">
+                        {errorMsg}
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    id="waitlist-submit-btn"
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="px-7 py-4 rounded-2xl font-display font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/25 hover:shadow-lg hover:shadow-blue-600/35 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    {status === "loading" ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <span>Join Waitlist</span>
+                        <Send className="w-4 h-4 text-white" />
+                      </>
+                    )}
+                  </button>
                 </div>
-                <h3 className="font-display font-black text-xl sm:text-2xl text-[#2D3748]">
-                  Pay once on the App Store. Own it forever.
-                </h3>
-                <p className="text-xs sm:text-sm text-[#718096] max-w-xl leading-relaxed">
-                  We believe mindful media shouldn&apos;t charge you every single month. Waitlist members get early TestFlight builds and locked-in early-bird pricing.
-                </p>
+
+                {/* Sub-guarantee line */}
+                <div className="flex items-center justify-between pt-2 px-1 text-xs text-[#718096]">
+                  <div className="flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Zero spam</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <HeartHandshake className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Pay once • No subscriptions</span>
+                  </div>
+                </div>
+              </form>
+            </div>
+          ) : (
+            /* Success State */
+            <div className="glass-card rounded-[32px] p-8 shadow-2xl border border-white/90 animate-in fade-in zoom-in-95 duration-300">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 mb-3">
+                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+                You&apos;re on the list! (# {waitlistNumber})
               </div>
-            </div>
-
-            <button
-              onClick={scrollToWaitlist}
-              className="px-6 py-3.5 rounded-2xl font-bold text-sm bg-[#2D3748] text-white hover:bg-black transition-all cursor-pointer whitespace-nowrap shadow-sm hover:scale-105"
-            >
-              Claim Early Spot
-            </button>
-          </div>
-        </section>
-
-        {/* PHILOSOPHY & COMPARISON */}
-        <Comparison />
-
-        {/* FEATURES GRID */}
-        <Features />
-
-        {/* INTERACTIVE MASCOT COMPANION SHOWCASE */}
-        <MascotShowcase />
-
-        {/* FAQ ACCORDION */}
-        <Faq />
-
-        {/* SECONDARY BOTTOM CALL TO ACTION */}
-        <section className="py-24 sm:py-32 px-4 sm:px-8 max-w-4xl mx-auto w-full text-center">
-          <div className="glass-card rounded-[36px] p-10 sm:p-16 border border-white/90 shadow-2xl relative overflow-hidden bg-gradient-to-b from-white/95 to-[#AECFD0]/20 space-y-6">
-            <div className="w-24 h-24 mx-auto relative">
-              <Image
-                src="/mascot-excited.png"
-                alt="Excited mascot"
-                width={96}
-                height={96}
-                className="object-contain animate-bounce"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <h2 className="font-display font-black text-3xl sm:text-5xl text-[#2D3748] tracking-tight">
-                Ready to quit doomscrolling for good?
-              </h2>
-              <p className="text-base sm:text-lg text-[#718096] max-w-lg mx-auto leading-relaxed">
-                Join hundreds of mindful professionals reclaiming an hour of their day while staying sharper than ever.
+              <h3 className="font-display font-black text-2xl text-[#2D3748] mb-2">
+                You&apos;re in. Priority access reserved.
+              </h3>
+              <p className="text-sm text-[#718096] mb-5 max-w-sm mx-auto">
+                We sent a confirmation to <strong className="text-[#2D3748]">{email}</strong>. We&apos;ll notify you when the iOS TestFlight build drops.
               </p>
-            </div>
 
-            <div className="pt-2">
+              {/* Referral Link */}
+              <div className="bg-white/90 rounded-2xl p-3.5 border border-[#2D3748]/10 flex flex-col sm:flex-row items-center gap-3">
+                <span className="text-xs text-[#718096] flex-1 text-center sm:text-left">
+                  Share with friends to jump the queue:
+                </span>
+                <button
+                  type="button"
+                  onClick={copyReferral}
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-xs hover:shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-white" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5 text-white" />
+                      <span>Copy Link</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
               <button
-                onClick={scrollToWaitlist}
-                className="px-8 py-4.5 rounded-2xl font-display font-bold text-base text-white bg-gradient-to-r from-[#3B82F6] via-[#6366F1] to-[#A78BFA] shadow-lg hover:shadow-xl hover:scale-105 transition-all cursor-pointer inline-flex items-center gap-2.5"
+                onClick={() => {
+                  setStatus("idle");
+                  setEmail("");
+                }}
+                className="mt-4 text-xs text-[#718096] hover:underline cursor-pointer"
               >
-                <span>Join the Early Access List</span>
-                <ArrowRight className="w-4 h-4" />
+                Sign up another email
               </button>
             </div>
+          )}
+        </div>
 
-            <p className="text-xs sm:text-sm text-[#718096] pt-2">
-              Pay once • No monthly subscriptions • Lifetime access
-            </p>
+        {/* Social Proof */}
+        <div className="mt-8 flex items-center justify-center gap-2.5 text-xs text-[#718096]">
+          <div className="flex items-center -space-x-1.5">
+            {["🧑‍💻", "👩‍🔬", "👨‍🎨", "👩‍💼"].map((emoji, i) => (
+              <div
+                key={i}
+                className="w-6 h-6 rounded-full bg-white border border-[#F4F7F6] flex items-center justify-center text-[10px] shadow-2xs"
+              >
+                {emoji}
+              </div>
+            ))}
           </div>
-        </section>
+          <span>
+            <strong className="text-[#2D3748]">1,480+</strong> people waiting for the iOS launch
+          </span>
+        </div>
       </main>
 
-      {/* FOOTER */}
-      <Footer />
+      {/* Minimal Footer */}
+      <footer className="relative z-10 w-full max-w-xl flex items-center justify-between text-xs text-[#718096]/80 pt-4">
+        <span>© {new Date().getFullYear()} FOMO NOMO</span>
+        <span>A project by Lumivor</span>
+      </footer>
     </div>
   );
 }
