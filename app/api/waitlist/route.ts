@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { sendWaitlistConfirmationEmail } from "@/lib/mailer";
 
 export async function GET() {
   try {
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Try to insert
+    // Try to insert into Supabase
     const { data, error } = await supabase
       .from("waitlist")
       .insert([{ email }])
@@ -45,6 +46,12 @@ export async function POST(req: Request) {
           .single();
 
         const spot = existing ? 500 + Number(existing.id) : 501;
+
+        // Send confirmation in background
+        sendWaitlistConfirmationEmail(email, spot).catch((err) =>
+          console.error("[Mailer Background Error]", err)
+        );
+
         return NextResponse.json({
           success: true,
           spot,
@@ -61,6 +68,11 @@ export async function POST(req: Request) {
     const newId = data?.[0]?.id || 1;
     const spot = 500 + Number(newId);
 
+    // Send confirmation in background
+    sendWaitlistConfirmationEmail(email, spot).catch((err) =>
+      console.error("[Mailer Background Error]", err)
+    );
+
     return NextResponse.json({
       success: true,
       spot,
@@ -71,3 +83,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
